@@ -1,5 +1,9 @@
 import socket
 import time
+import pickle
+# Pickle is a module that converts any data into a byte stream
+# The pickle module is not secure, so only unpickle the data you trust
+
 
 HEADERSIZE = 10
 # create the socket
@@ -20,18 +24,10 @@ while True:
     clientsocket, address = s.accept()
     print(f"Connection from {address} has been established.")
 
-    msg = "Welcome to the server!"
-    # The first part of the msg is a header.
-    # the :<20 will append spaces at the end of the length (left align())
-    # in this case msg has length 22, hence 8 spaces will be appended
-    msg = f'{len(msg):<{HEADERSIZE}}' + msg
+    d = {1: "Hey", 2: "There"}
+    # pickle is already in bytes.
+    msg = pickle.dumps(d)
+    msg = bytes(f'{len(msg):<{HEADERSIZE}}', "utf-8") + msg
     # Send 8 bit buffers, 1 per character.
-    clientsocket.send(bytes(msg, "utf-8"))
+    clientsocket.send(msg)
 
-    while True:
-        # Send a message every 3 seconds
-        time.sleep(3)
-        msg = f"The time is: {time.time()}"
-        msg = f"{len(msg):<{HEADERSIZE}}" + msg
-        clientsocket.send(bytes(msg, "utf-8"))
-    
